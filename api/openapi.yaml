@@ -1,0 +1,2383 @@
+openapi: 3.0.0
+info:
+  description: "API for processing subscribers requests to the PDX API to retrieve\
+    \ one or more combinations of data, deliver and update records in a Members PDS\
+    \ and ensure record integrity is maintained."
+  title: PDX API
+  version: 1.0.0
+servers:
+- description: PDX-API host.
+  url: https://api.mydex.org
+tags:
+- description: Operations related to calendar events
+  name: Calendar
+- description: Operations related to referrals
+  name: Referrals
+- description: Operations related to secure messages
+  name: Secure Messages
+- description: Operations related to timeline
+  name: Timeline
+paths:
+  /calendar/add-event:
+    post:
+      description: Creates a new event in the user's calendar.
+      operationId: postCalendarEvent
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarEventCreateRequestBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - post:/calendar/add-event
+        - mydex:pdx
+      summary: Supports adding a calendar-event.
+      tags:
+      - Calendar
+  /calendar/add-appointment:
+    post:
+      description: Creates a new appointment in the user's calendar. An appointment
+        must be made within a specified context e.g. a 'Referral'
+      operationId: postCalendarAppointment
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarAppointmentCreateRequestBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - post:/calendar/add-appointment
+        - mydex:pdx
+      summary: Supports adding a calendar-appointment.
+      tags:
+      - Calendar
+  /calendar/get-events:
+    get:
+      description: Returns a list of calendar events.
+      operationId: getCalendarEvents
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetEventsResponse"
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - get:/calendar/get-events
+        - mydex:pdx
+      summary: Retrieve calendar events
+      tags:
+      - Calendar
+  /calendar/get-appointments:
+    get:
+      description: Returns a list of appointments filtered by context and context_id.
+      operationId: getCalendarAppointments
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      - description: The context this belongs to
+        explode: true
+        in: query
+        name: context
+        required: true
+        schema:
+          example: referral
+          type: string
+        style: form
+      - description: The specific ID of the context record
+        explode: true
+        in: query
+        name: context_id
+        required: true
+        schema:
+          example: 123
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAppointmentsResponse"
+          description: Successful response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - get:/calendar/get-appointments
+        - mydex:pdx
+      summary: Retrieve appointments for a given context
+      tags:
+      - Calendar
+  /calendar/update-event:
+    put:
+      description: "Updates an event in the user's calendar. For example, updating\
+        \ the 'status' from 'INVITED' to 'CONFIRMED' when a user accepts the invitation\
+        \ to an appointment."
+      operationId: putCalendarEvent
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarEventUpdateRequestBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - put:/calendar/update-event
+        - mydex:pdx
+      summary: Supports updating a calendar-event.
+      tags:
+      - Calendar
+  /calendar/delete-event:
+    delete:
+      description: Deletes an event in the user's calendar.
+      operationId: deleteCalendarEvent
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalendarEventDeleteRequestBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - delete:/calendar/delete-event
+        - mydex:pdx
+      summary: Supports deleting a calendar-event.
+      tags:
+      - Calendar
+  /referrals/self-refer:
+    post:
+      description: Creates a new referral of type 'Self Referred' in the member's
+        PDS.
+      operationId: postSelfReferral
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SelfReferralRequestBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - post:/referrals/self-refer
+        - mydex:pdx
+      summary: Supports self-referral.
+      tags:
+      - Referrals
+  /referrals/read-all:
+    get:
+      description: Returns a list of referrals.
+      operationId: getAllReferrals
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReferralListResponse"
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - get:/referrals/read-all
+        - mydex:pdx
+      summary: Retrieve rall referrals for a given member.
+      tags:
+      - Referrals
+  /referrals/read-single:
+    get:
+      description: Returns the requested referral.
+      operationId: getSingleReferral
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      - description: The record id requested.
+        explode: true
+        in: query
+        name: id
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReferralSingleResponse"
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - get:/referrals/read-single
+        - mydex:pdx
+      summary: Retrieve a single referral by id for a given member.
+      tags:
+      - Referrals
+  /referrals/update-status:
+    put:
+      description: "Updates the status of a member's referral specified by id. For\
+        \ example, having been referred to a service, the status is set by default\
+        \ to 'Referred' and this route enables it to be updated to 'Accepted' or 'Rejected'"
+      operationId: updateReferralStatus
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReferralStatusUpdateRequestBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - put:/referrals/update-status
+        - mydex:pdx
+      summary: Supports updating the status of a referral.
+      tags:
+      - Referrals
+  /secure-messages/send:
+    post:
+      description: Creates a new sent message in the member's PDS.
+      operationId: postSecureMessageSend
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecureMessageSendRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - post:/secure-messages/send
+        - mydex:pdx
+      summary: Supports sending a message from the member's PDS.
+      tags:
+      - Secure Messages
+  /secure-messages/receive:
+    post:
+      description: Creates a new received message in the member's PDS.
+      operationId: postSecureMessageReceive
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecureMessageReceiveRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResponse"
+          description: Successfully created record.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - post:/secure-messages/receive
+        - mydex:pdx
+      summary: Supports sending a message to the member's PDS.
+      tags:
+      - Secure Messages
+  /secure-messages/conversation:
+    get:
+      description: Returns a list of secure messages that form part of a conversation.
+      operationId: getSecureMessageConversation
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      - description: The specific ID of the conversation that groups messages together
+        explode: true
+        in: query
+        name: conversation_id
+        required: true
+        schema:
+          example: referral-123
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecureMessageConversationResponse"
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - get:/secure-messages/conversation
+        - mydex:pdx
+      summary: Retrieve all secure messages for a given conversation.
+      tags:
+      - Secure Messages
+  /timeline:
+    get:
+      description: "Returns a list of timeline items which includes: referrals, calendar\
+        \ events and secure messages."
+      operationId: getTimeline
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineResponse"
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - get:/timeline
+        - mydex:pdx
+      summary: Retrieve list of timeline items.
+      tags:
+      - Timeline
+  /timeline/single-item:
+    get:
+      description: Returns a single timeline item based on feature block and feature
+        block id requested e.g. a 'referral' with id 123.
+      operationId: getTimelineItem
+      parameters:
+      - description: Member's Connection Key
+        explode: false
+        in: header
+        name: Connection-Token
+        required: true
+        schema:
+          example: abc123xyz456
+          type: string
+        style: simple
+      - description: The unique ID of a mydex member
+        explode: true
+        in: query
+        name: uid
+        required: true
+        schema:
+          example: "1234"
+          type: string
+        style: form
+      - description: The connection_id is a shared id between a connection and a member.
+          It is a hyphenated combination of the member UID and the Dedicated Connection
+          NID.
+        explode: true
+        in: query
+        name: con_id
+        required: true
+        schema:
+          example: 1234-67890
+          type: string
+        style: form
+      - description: The feature block the teimline item belongs to
+        explode: true
+        in: query
+        name: feature_block
+        required: true
+        schema:
+          enum:
+          - referrals
+          - secure_messages
+          - calendar
+          example: referrals
+          type: string
+        style: form
+      - description: "The specific ID of the record within the specified feature block\
+          \ e.g. if 'referrals' is the feature block, then this should be a specific\
+          \ referral id"
+        explode: true
+        in: query
+        name: feature_block_id
+        required: true
+        schema:
+          example: 123
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineSingleItemResponse"
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+          description: Unauthorized
+      security:
+      - oauth2:
+        - get:/timeline/single-item
+        - mydex:pdx
+      summary: Retrieve a single timeline item.
+      tags:
+      - Timeline
+components:
+  parameters:
+    ConnectionToken:
+      description: Member's Connection Key
+      explode: false
+      in: header
+      name: Connection-Token
+      required: true
+      schema:
+        example: abc123xyz456
+        type: string
+      style: simple
+    Uid:
+      description: The unique ID of a mydex member
+      explode: true
+      in: query
+      name: uid
+      required: true
+      schema:
+        example: "1234"
+        type: string
+      style: form
+    ConId:
+      description: The connection_id is a shared id between a connection and a member.
+        It is a hyphenated combination of the member UID and the Dedicated Connection
+        NID.
+      explode: true
+      in: query
+      name: con_id
+      required: true
+      schema:
+        example: 1234-67890
+        type: string
+      style: form
+    Id:
+      description: The record id requested.
+      explode: true
+      in: query
+      name: id
+      required: true
+      schema:
+        example: "1234"
+        type: string
+      style: form
+    ServiceId:
+      description: The id of the linked service e.g. for requesting all referrals
+        a member has linked to that service.
+      explode: true
+      in: query
+      name: service_id
+      required: true
+      schema:
+        example: "1234"
+        type: string
+      style: form
+    Context:
+      description: The context this belongs to
+      explode: true
+      in: query
+      name: context
+      required: true
+      schema:
+        example: referral
+        type: string
+      style: form
+    ContextId:
+      description: The specific ID of the context record
+      explode: true
+      in: query
+      name: context_id
+      required: true
+      schema:
+        example: 123
+        type: integer
+      style: form
+    ConversationId:
+      description: The specific ID of the conversation that groups messages together
+      explode: true
+      in: query
+      name: conversation_id
+      required: true
+      schema:
+        example: referral-123
+        type: string
+      style: form
+    FeatureBlock:
+      description: The feature block the teimline item belongs to
+      explode: true
+      in: query
+      name: feature_block
+      required: true
+      schema:
+        enum:
+        - referrals
+        - secure_messages
+        - calendar
+        example: referrals
+        type: string
+      style: form
+    FeatureBlockId:
+      description: "The specific ID of the record within the specified feature block\
+        \ e.g. if 'referrals' is the feature block, then this should be a specific\
+        \ referral id"
+      explode: true
+      in: query
+      name: feature_block_id
+      required: true
+      schema:
+        example: 123
+        type: integer
+      style: form
+  schemas:
+    CreateResponse:
+      example:
+        success: 1
+        last_insert_id: 123
+      properties:
+        success:
+          description: Indicates success
+          example: 1
+          type: integer
+        last_insert_id:
+          description: ID of the newly created record
+          example: 123
+          type: integer
+      type: object
+    UpdateResponse:
+      example:
+        success: 1
+      properties:
+        success:
+          description: Indicates success
+          example: 1
+          type: integer
+      type: object
+    DeleteResponse:
+      example:
+        success: 1
+      properties:
+        success:
+          description: Indicates success
+          example: 1
+          type: integer
+      type: object
+    ErrorResponse:
+      example:
+        success: 0
+        message: Title is required OR Database error.
+      properties:
+        success:
+          description: Indicates failure
+          example: 0
+          type: integer
+        message:
+          description: Error message explaining the failure
+          example: Title is required OR Database error.
+          type: string
+      type: object
+    AuthErrorResponse:
+      example:
+        error:
+          message: Access denied
+          reason: The token is invalid or expired
+      properties:
+        error:
+          $ref: "#/components/schemas/AuthErrorResponse_error"
+      type: object
+    CalendarEventCommonRequestBodyFields:
+      description: Common fields shared across all calendar event types
+      properties:
+        title:
+          description: Title of the event
+          example: Lunch with Ellen
+          type: string
+        description:
+          description: Detailed description of the event
+          example: Meeting to discuss expectations
+          type: string
+        start_timestamp:
+          description: Start date and time as Unix timestamp
+          example: 1754289000
+          format: int64
+          type: integer
+        end_timestamp:
+          description: End date and time as Unix timestamp
+          example: 1754289000
+          format: int64
+          type: integer
+        status:
+          default: TENTATIVE
+          description: Status of the event
+          enum:
+          - INVITED
+          - TENTATIVE
+          - CONFIRMED
+          - REJECTED
+          - CANCELLED
+          example: INVITED
+          type: string
+        organiser:
+          description: Creator of the event
+          example: Sally Adams
+          type: string
+        attendee:
+          description: Person attending the event
+          example: Ellen Munro
+          type: string
+        location:
+          description: Event location
+          example: Main building
+          type: string
+      type: object
+    CalendarEventCreateRequestBody:
+      allOf:
+      - $ref: "#/components/schemas/CalendarEventCommonRequestBodyFields"
+      - properties:
+          type:
+            description: Type of event
+            enum:
+            - Appointment
+            nullable: true
+            type: string
+        type: object
+      description: Fields for creating a generic calendar event
+      example:
+        title: Lunch with Ellen
+        description: Meeting to discuss expectations
+        start_timestamp: 1754289000
+        end_timestamp: 1754289000
+        status: INVITED
+        organiser: Sally Adams
+        attendee: Ellen Munro
+        location: Main building
+        type: Appointment
+      required:
+      - end_timestamp
+      - start_timestamp
+      - status
+      - title
+    CalendarAppointmentCreateRequestBody:
+      allOf:
+      - $ref: "#/components/schemas/CalendarEventCommonRequestBodyFields"
+      - properties:
+          context:
+            description: The context the appointment belongs to e.g. a referral
+            enum:
+            - referral
+            example: referral
+            type: string
+          context_id:
+            description: The id of the specific context record that this appointment
+              relates to e.g. the referral id
+            example: 123
+            type: integer
+        type: object
+      description: Fields for creating a calendar event of type 'Appointment'
+      example:
+        title: Lunch with Ellen
+        description: Meeting to discuss expectations
+        start_timestamp: 1754289000
+        end_timestamp: 1754289000
+        status: INVITED
+        organiser: Sally Adams
+        attendee: Ellen Munro
+        location: Main building
+        context: referral
+        context_id: 123
+      required:
+      - context
+      - context_id
+      - end_timestamp
+      - start_timestamp
+      - status
+      - title
+    CalendarEventUpdateRequestBody:
+      allOf:
+      - properties:
+          id:
+            description: ID of the calendar-event to be updated
+            example: 123
+            type: integer
+        type: object
+      - $ref: "#/components/schemas/CalendarEventCommonRequestBodyFields"
+      description: Fields for updating a calendar event. Only supplied fields will
+        be updated. At least one field other than 'id' must be provided.
+      example:
+        id: 123
+        title: Lunch with Ellen
+        description: Meeting to discuss expectations
+        start_timestamp: 1754289000
+        end_timestamp: 1754289000
+        status: INVITED
+        organiser: Sally Adams
+        attendee: Ellen Munro
+        location: Main building
+      required:
+      - id
+    CalendarEventDeleteRequestBody:
+      description: Fields for deleting a calendar event.
+      example:
+        id: 123
+      properties:
+        id:
+          description: ID of the calendar-event to be deleted
+          example: 123
+          type: integer
+      required:
+      - id
+      type: object
+    CalendarEvent:
+      description: A calendar event returned from the API
+      example:
+        id: "55"
+        instance: "0"
+        source: "3939"
+        created_timestamp: "1755506045"
+        updated_timestamp: "0"
+        external_uid: "27"
+        title: My Title
+        description: description
+        start_timestamp: "1754289000"
+        end_timestamp: "1754292600"
+        organiser: organiser
+        attendee: attendee
+        status: status
+        location: location
+        type: type
+        tags: tags
+        trigger: trigger
+        action: action
+        reminder_description: reminder_description
+        context_name: context_name
+      properties:
+        id:
+          example: "55"
+          type: string
+        instance:
+          example: "0"
+          type: string
+        source:
+          example: "3939"
+          type: string
+        created_timestamp:
+          example: "1755506045"
+          type: string
+        updated_timestamp:
+          example: "0"
+          type: string
+        external_uid:
+          example: "27"
+          nullable: true
+          type: string
+        title:
+          example: My Title
+          nullable: true
+          type: string
+        description:
+          nullable: true
+          type: string
+        start_timestamp:
+          example: "1754289000"
+          type: string
+        end_timestamp:
+          example: "1754292600"
+          type: string
+        organiser:
+          nullable: true
+          type: string
+        attendee:
+          nullable: true
+          type: string
+        status:
+          nullable: true
+          type: string
+        location:
+          nullable: true
+          type: string
+        type:
+          nullable: true
+          type: string
+        tags:
+          nullable: true
+          type: string
+        trigger:
+          nullable: true
+          type: string
+        action:
+          nullable: true
+          type: string
+        reminder_description:
+          nullable: true
+          type: string
+        context_name:
+          nullable: true
+          type: string
+      type: object
+    GetEventsResponse:
+      example:
+        success: 1
+        events:
+        - id: "55"
+          instance: "0"
+          source: "3939"
+          created_timestamp: "1755506045"
+          updated_timestamp: "0"
+          external_uid: "27"
+          title: My Title
+          description: description
+          start_timestamp: "1754289000"
+          end_timestamp: "1754292600"
+          organiser: organiser
+          attendee: attendee
+          status: status
+          location: location
+          type: type
+          tags: tags
+          trigger: trigger
+          action: action
+          reminder_description: reminder_description
+          context_name: context_name
+        - id: "55"
+          instance: "0"
+          source: "3939"
+          created_timestamp: "1755506045"
+          updated_timestamp: "0"
+          external_uid: "27"
+          title: My Title
+          description: description
+          start_timestamp: "1754289000"
+          end_timestamp: "1754292600"
+          organiser: organiser
+          attendee: attendee
+          status: status
+          location: location
+          type: type
+          tags: tags
+          trigger: trigger
+          action: action
+          reminder_description: reminder_description
+          context_name: context_name
+      properties:
+        success:
+          example: 1
+          type: integer
+        events:
+          items:
+            $ref: "#/components/schemas/CalendarEvent"
+          type: array
+      type: object
+    GetAppointmentsResponse:
+      example:
+        success: 1
+        appointments:
+        - id: "55"
+          instance: "0"
+          source: "3939"
+          created_timestamp: "1755506045"
+          updated_timestamp: "0"
+          external_uid: "27"
+          title: My Title
+          description: description
+          start_timestamp: "1754289000"
+          end_timestamp: "1754292600"
+          organiser: organiser
+          attendee: attendee
+          status: status
+          location: location
+          type: type
+          tags: tags
+          trigger: trigger
+          action: action
+          reminder_description: reminder_description
+          context_name: context_name
+        - id: "55"
+          instance: "0"
+          source: "3939"
+          created_timestamp: "1755506045"
+          updated_timestamp: "0"
+          external_uid: "27"
+          title: My Title
+          description: description
+          start_timestamp: "1754289000"
+          end_timestamp: "1754292600"
+          organiser: organiser
+          attendee: attendee
+          status: status
+          location: location
+          type: type
+          tags: tags
+          trigger: trigger
+          action: action
+          reminder_description: reminder_description
+          context_name: context_name
+      properties:
+        success:
+          example: 1
+          type: integer
+        appointments:
+          items:
+            $ref: "#/components/schemas/CalendarEvent"
+          type: array
+      type: object
+    TimelineItemCalendarEvent:
+      description: A single timeline item representing a calendar event
+      properties:
+        feature_block:
+          description: Type of feature block this timeline item belongs to
+          example: calendar
+          type: string
+        feature_block_id:
+          description: ID of the feature block
+          example: 82
+          type: integer
+        instance:
+          example: "0"
+          type: string
+        source:
+          example: 3939-40102
+          type: string
+        created_timestamp:
+          example: "1764071427"
+          type: string
+        updated_timestamp:
+          example: "1764071427"
+          type: string
+        external_uid:
+          example: ""
+          nullable: true
+          type: string
+        title:
+          example: My Event
+          nullable: true
+          type: string
+        description:
+          example: My Description
+          nullable: true
+          type: string
+        start_timestamp:
+          example: "4th August 2025, 6:30 am"
+          type: string
+        end_timestamp:
+          example: "4th August 2025, 7:30 am"
+          type: string
+        organiser:
+          nullable: true
+          type: string
+        attendee:
+          nullable: true
+          type: string
+        status:
+          example: TENTATIVE
+          nullable: true
+          type: string
+        location:
+          nullable: true
+          type: string
+        type:
+          nullable: true
+          type: string
+        tags:
+          nullable: true
+          type: string
+        trigger:
+          nullable: true
+          type: string
+        action:
+          nullable: true
+          type: string
+        reminder_description:
+          nullable: true
+          type: string
+        duration_string:
+          example: '1 hour '
+          type: string
+        duration_of_event:
+          example: 0.041666666666666664
+          format: float
+          type: number
+      type: object
+    ReferralCommonRequestBodyFields:
+      description: Common fields shared across all referral types
+      properties:
+        service_id:
+          description: ID of the service being referred to
+          example: 1
+          type: integer
+        referree_background:
+          description: Background information about the referree
+          example: Client has a history of...
+          type: string
+        referree_requirements:
+          description: Requirements of the referree
+          example: Needs support with...
+          type: string
+        referree_availability:
+          $ref: "#/components/schemas/ReferralCommonRequestBodyFields_referree_availability"
+        referrer_name:
+          description: Name of the person making the referral
+          example: John Doe
+          type: string
+        service_name:
+          description: Name of the service
+          example: Community Support
+          type: string
+        service_description:
+          description: Description of the service
+          example: Provides support for...
+          type: string
+        service_url:
+          description: URL of the service
+          example: https://example.com
+          format: uri
+          type: string
+        service_email:
+          description: Email address of the service
+          example: service@example.com
+          format: email
+          type: string
+        contact_number:
+          description: Contact number for the service
+          example: "+441234567890"
+          type: string
+        memo:
+          description: Internal memo or notes
+          example: Additional notes
+          type: string
+        start_time:
+          description: Start time as a Unix timestamp
+          example: 1754289000
+          format: int64
+          type: integer
+      type: object
+    SelfReferralRequestBody:
+      allOf:
+      - $ref: "#/components/schemas/ReferralCommonRequestBodyFields"
+      description: Fields for creating a self referral
+      example:
+        service_id: 1
+        referree_background: Client has a history of...
+        referree_requirements: Needs support with...
+        referree_availability:
+          AM: []
+          PM: []
+        referrer_name: John Doe
+        service_name: Community Support
+        service_description: Provides support for...
+        service_url: https://example.com
+        service_email: service@example.com
+        contact_number: "+441234567890"
+        memo: Additional notes
+        start_time: 1754289000
+      required:
+      - service_id
+    ReferralStatusUpdateRequestBody:
+      description: Fields for updating the status of a referral (e.g. from 'Referred'
+        to 'Accepted')
+      example:
+        id: 123
+        status: Rejected
+      properties:
+        id:
+          description: ID of the referral to be updated
+          example: 123
+          type: integer
+        status:
+          description: Status the referral is to be updated to
+          enum:
+          - Referred
+          - In Progress
+          - Accepted
+          - Rejected
+          example: Rejected
+          type: string
+      required:
+      - id
+      - status
+      type: object
+    ReferralListResponse:
+      description: Response containing a list of referrals
+      example:
+        success: 1
+        referrals:
+        - id: 1
+          created_timestamp: 1642137822
+          service_id: 2
+          service_name: My Service Name
+          service_description: My service description
+          service_contact_number: "07987654321"
+          service_email: my_service@email.com
+          service_url: my-service.com
+          type: Self Referred
+          status: Rejected
+        - id: 1
+          created_timestamp: 1642137822
+          service_id: 2
+          service_name: My Service Name
+          service_description: My service description
+          service_contact_number: "07987654321"
+          service_email: my_service@email.com
+          service_url: my-service.com
+          type: Self Referred
+          status: Rejected
+      properties:
+        success:
+          example: 1
+          type: integer
+        referrals:
+          items:
+            $ref: "#/components/schemas/ReferralListResponse_referrals_inner"
+          type: array
+      type: object
+    ReferralSingleResponse:
+      description: Response containing a single referral (requires query parameter
+        'id')
+      example:
+        success: 1
+        referral:
+          id: 100
+          created_timestamp: 1774361117
+          service_id: 2
+          type: Self Referred
+          status: Referred
+          memo: my referral memo
+      properties:
+        success:
+          example: 1
+          type: integer
+        referral:
+          $ref: "#/components/schemas/ReferralSingleResponse_referral"
+      type: object
+    TimelineItemReferral:
+      description: A single timeline item representing a referral
+      example:
+        feature_block: referrals
+        feature_block_id: 103
+        instance: "0"
+        source: 3939-40102
+        created_timestamp: 1774540331
+        updated_timestamp: 1774540331
+        service_id: 2
+        service_name: Grad Careers UK
+        service_description: Comprehensive career guidance and counselling
+        service_url: https://gradcareersuk.example.com
+        service_email: contact@gradcareersuk.example.com
+        contact_name: John Smith
+        contact_title: Senior Consultant
+        contact_number: "07987654321"
+        referrer_name: Marco Thompson
+        status: Referred
+        external_id: EXT12345
+        start_time: 1774540331
+        end_time: 1774543931
+        is_processed: false
+        complete_time: 0
+        memo: Referral memo for follow-up
+        duration: 1 hour
+        referree_background: Has 5 years of experience in marketing
+        referree_requirements: Requires guidance on career path
+        referree_availability: "{}"
+        type: Self Referred
+        start_timestamp: "26th March 2026, 3:52 pm"
+      properties:
+        feature_block:
+          description: Type of feature block this timeline item belongs to
+          example: referrals
+          type: string
+        feature_block_id:
+          description: ID of the feature block record i.e. the referral id
+          example: 103
+          type: integer
+        instance:
+          example: "0"
+          type: string
+        source:
+          description: The context within which this record was created i.e. the specific
+            connection
+          example: 3939-40102
+          type: string
+        created_timestamp:
+          example: 1774540331
+          format: int64
+          type: integer
+        updated_timestamp:
+          example: 1774540331
+          format: int64
+          type: integer
+        service_id:
+          description: The id of the service that the referral relates to
+          example: 2
+          type: integer
+        service_name:
+          example: Grad Careers UK
+          type: string
+        service_description:
+          example: Comprehensive career guidance and counselling
+          type: string
+        service_url:
+          example: https://gradcareersuk.example.com
+          type: string
+        service_email:
+          example: contact@gradcareersuk.example.com
+          type: string
+        contact_name:
+          example: John Smith
+          type: string
+        contact_title:
+          example: Senior Consultant
+          type: string
+        contact_number:
+          example: "07987654321"
+          type: string
+        referrer_name:
+          example: Marco Thompson
+          type: string
+        status:
+          enum:
+          - Referred
+          - In Progress
+          - Accepted
+          - Rejected
+          example: Referred
+          type: string
+        external_id:
+          example: EXT12345
+          type: string
+        start_time:
+          example: 1774540331
+          format: int64
+          type: integer
+        end_time:
+          example: 1774543931
+          format: int64
+          type: integer
+        is_processed:
+          example: false
+          type: boolean
+        complete_time:
+          example: 0
+          type: integer
+        memo:
+          example: Referral memo for follow-up
+          type: string
+        duration:
+          example: 1 hour
+          type: string
+        referree_background:
+          example: Has 5 years of experience in marketing
+          type: string
+        referree_requirements:
+          example: Requires guidance on career path
+          type: string
+        referree_availability:
+          description: Availability of the referree in AM/PM slots
+          type: object
+        type:
+          example: Self Referred
+          type: string
+        start_timestamp:
+          example: "26th March 2026, 3:52 pm"
+          type: string
+      type: object
+    SecureMessageCommonFields:
+      properties:
+        message_content:
+          description: Content of the message
+          example: "Hello, how can I help?"
+          type: string
+        conversation_id:
+          description: "ID of the conversation formatted like {context}-{context_id}\
+            \ where context is e.g. 'referral' and context_id is the id of the specifc\
+            \ record in that context."
+          example: referral-123
+          type: string
+      required:
+      - conversation_id
+      - message_content
+      type: object
+    SecureMessageSendRequest:
+      allOf:
+      - $ref: "#/components/schemas/SecureMessageCommonFields"
+      - properties:
+          message_to:
+            description: Recipient user ID
+            example: Amanda123
+            type: string
+        required:
+        - message_to
+        type: object
+      description: Request to send a secure message
+      example:
+        message_content: "Hello, how can I help?"
+        conversation_id: referral-123
+        message_to: Amanda123
+    SecureMessageReceiveRequest:
+      allOf:
+      - $ref: "#/components/schemas/SecureMessageCommonFields"
+      - properties:
+          message_from:
+            description: Sender user ID
+            example: Eric789
+            type: string
+        required:
+        - message_from
+        type: object
+      description: Request to receive a secure message
+      example:
+        message_content: "Hello, how can I help?"
+        conversation_id: referral-123
+        message_from: Eric789
+    SecureMessage:
+      description: A single message within a conversation
+      example:
+        id: "361"
+        conversation_id: referral-102
+        message_to: Another person
+        message_from: ""
+        time_sent: "1774459015"
+        time_received: "1774459017"
+        message_content: Hello
+        status: sent
+      properties:
+        id:
+          description: Message ID
+          example: "361"
+          type: string
+        conversation_id:
+          description: Conversation identifier
+          example: referral-102
+          type: string
+        message_to:
+          description: Recipient of the message (present on sent messages)
+          example: Another person
+          type: string
+        message_from:
+          description: Sender of the message (present on received messages)
+          example: ""
+          type: string
+        time_sent:
+          description: Timestamp when message was sent
+          example: "1774459015"
+          type: string
+        time_received:
+          description: Timestamp when message was received
+          example: "1774459017"
+          type: string
+        message_content:
+          description: Content of the message
+          example: Hello
+          type: string
+        status:
+          description: Message status
+          enum:
+          - sent
+          - received
+          example: sent
+          type: string
+      type: object
+    SecureMessageConversationResponse:
+      description: Response containing all messages in a conversation
+      example:
+        messages:
+        - id: "361"
+          conversation_id: referral-102
+          message_to: Another person
+          message_from: ""
+          time_sent: "1774459015"
+          time_received: "1774459017"
+          message_content: Hello
+          status: sent
+        - id: "361"
+          conversation_id: referral-102
+          message_to: Another person
+          message_from: ""
+          time_sent: "1774459015"
+          time_received: "1774459017"
+          message_content: Hello
+          status: sent
+      properties:
+        messages:
+          items:
+            $ref: "#/components/schemas/SecureMessage"
+          type: array
+      type: object
+    TimelineItemSecureMessage:
+      description: A single timeline item representing a secure message
+      properties:
+        feature_block:
+          description: Type of feature block this timeline item belongs to
+          example: secure_messages
+          type: string
+        feature_block_id:
+          description: ID of the feature block
+          example: 364
+          type: integer
+        start_timestamp:
+          description: Formatted start timestamp for display
+          example: "26th March 2026, 4:15 pm"
+          type: string
+        item_timestamp:
+          description: Raw timestamp of the timeline item
+          example: 1774541713
+          format: int64
+          type: integer
+        created_timestamp:
+          example: 1774541713
+          format: int64
+          type: integer
+        updated_timestamp:
+          example: 1774541713
+          format: int64
+          type: integer
+        conversation_id:
+          description: Conversation identifier
+          example: referral-104
+          type: string
+        time_sent:
+          description: Timestamp when message was sent
+          example: ""
+          type: string
+        time_received:
+          description: Timestamp when message was received
+          example: "1774541713"
+          type: string
+        message_from:
+          description: Sender of the message (present on received messages)
+          example: Another person
+          type: string
+        message_to:
+          description: Recipient of the message (present on sent messages)
+          example: ""
+          type: string
+        message_content:
+          description: Content of the message
+          example: Hello
+          type: string
+      type: object
+    TimelineResponse:
+      description: "Response containing a mixed timeline of calendar events, referrals,\
+        \ and secure messages"
+      example:
+        success: 1
+        timeline:
+        - id: 101
+          feature_block: referrals
+          feature_block_id: "36"
+          start_timestamp: 2025-03-26T09:15:00Z
+          item_timestamp: 1774459015
+          service_description: Comprehensive career counselling for graduates
+          service_name: Grad Careers UK
+          contact_name: John Smith
+          contact_title: Senior Consultant
+          memo: Referral sent for follow-up next week
+          status: In Progress
+        - id: 101
+          feature_block: referrals
+          feature_block_id: "36"
+          start_timestamp: 2025-03-26T09:15:00Z
+          item_timestamp: 1774459015
+          service_description: Comprehensive career counselling for graduates
+          service_name: Grad Careers UK
+          contact_name: John Smith
+          contact_title: Senior Consultant
+          memo: Referral sent for follow-up next week
+          status: In Progress
+      properties:
+        success:
+          example: 1
+          type: integer
+        timeline:
+          description: "Array of timeline items, which can be calendar events, referrals,\
+            \ or secure messages"
+          items:
+            $ref: "#/components/schemas/TimelineResponse_timeline_inner"
+          type: array
+      type: object
+    TimelineSingleItemResponse:
+      description: "Response containing a single timeline item, which can be a referral,\
+        \ secure message, or calendar event"
+      example:
+        success: 1
+        timeline_item:
+          feature_block: referrals
+          feature_block_id: 103
+          instance: "0"
+          source: 3939-40102
+          created_timestamp: 1774540331
+          updated_timestamp: 1774540331
+          service_id: 2
+          service_name: Grad Careers UK
+          service_description: Comprehensive career guidance and counselling
+          service_url: https://gradcareersuk.example.com
+          service_email: contact@gradcareersuk.example.com
+          contact_name: John Smith
+          contact_title: Senior Consultant
+          contact_number: "07987654321"
+          referrer_name: Marco Thompson
+          status: Referred
+          external_id: EXT12345
+          start_time: 1774540331
+          end_time: 1774543931
+          is_processed: false
+          complete_time: 0
+          memo: Referral memo for follow-up
+          duration: 1 hour
+          referree_background: Has 5 years of experience in marketing
+          referree_requirements: Requires guidance on career path
+          referree_availability: "{}"
+          type: Self Referred
+          start_timestamp: "26th March 2026, 3:52 pm"
+      properties:
+        success:
+          example: 1
+          type: integer
+        timeline_item:
+          $ref: "#/components/schemas/TimelineSingleItemResponse_timeline_item"
+      type: object
+    AuthErrorResponse_error:
+      example:
+        message: Access denied
+        reason: The token is invalid or expired
+      properties:
+        message:
+          example: Access denied
+          type: string
+        reason:
+          example: The token is invalid or expired
+          type: string
+      type: object
+    ReferralCommonRequestBodyFields_referree_availability:
+      description: "Availability of the referree. If not provided, defaults to empty\
+        \ AM/PM arrays."
+      example:
+        AM: []
+        PM: []
+      properties:
+        AM:
+          description: Morning availability slots
+          example: []
+          items:
+            type: string
+          type: array
+        PM:
+          description: Afternoon availability slots
+          example: []
+          items:
+            type: string
+          type: array
+      type: object
+    ReferralListResponse_referrals_inner:
+      example:
+        id: 1
+        created_timestamp: 1642137822
+        service_id: 2
+        service_name: My Service Name
+        service_description: My service description
+        service_contact_number: "07987654321"
+        service_email: my_service@email.com
+        service_url: my-service.com
+        type: Self Referred
+        status: Rejected
+      properties:
+        id:
+          example: 1
+          type: integer
+        created_timestamp:
+          example: 1642137822
+          format: int64
+          type: integer
+        service_id:
+          example: 2
+          type: integer
+        service_name:
+          example: My Service Name
+          type: string
+        service_description:
+          example: My service description
+          type: string
+        service_contact_number:
+          example: "07987654321"
+          type: string
+        service_email:
+          example: my_service@email.com
+          type: string
+        service_url:
+          example: my-service.com
+          type: string
+        type:
+          example: Self Referred
+          type: string
+        status:
+          enum:
+          - Referred
+          - In Progress
+          - Accepted
+          - Rejected
+          example: Rejected
+          type: string
+      type: object
+    ReferralSingleResponse_referral:
+      example:
+        id: 100
+        created_timestamp: 1774361117
+        service_id: 2
+        type: Self Referred
+        status: Referred
+        memo: my referral memo
+      properties:
+        id:
+          example: 100
+          type: integer
+        created_timestamp:
+          example: 1774361117
+          format: int64
+          type: integer
+        service_id:
+          example: 2
+          type: integer
+        type:
+          example: Self Referred
+          type: string
+        status:
+          enum:
+          - Referred
+          - In Progress
+          - Accepted
+          - Rejected
+          example: Referred
+          type: string
+        memo:
+          example: my referral memo
+          type: string
+      type: object
+    TimelineResponse_timeline_inner_oneOf:
+      description: Referral item
+      example:
+        id: 101
+        feature_block: referrals
+        feature_block_id: "36"
+        start_timestamp: 2025-03-26T09:15:00Z
+        item_timestamp: 1774459015
+        service_description: Comprehensive career counselling for graduates
+        service_name: Grad Careers UK
+        contact_name: John Smith
+        contact_title: Senior Consultant
+        memo: Referral sent for follow-up next week
+        status: In Progress
+      properties:
+        id:
+          example: 101
+          type: integer
+        feature_block:
+          example: referrals
+          type: string
+        feature_block_id:
+          example: "36"
+          type: string
+        start_timestamp:
+          example: 2025-03-26T09:15:00Z
+          type: string
+        item_timestamp:
+          example: 1774459015
+          type: integer
+        service_description:
+          example: Comprehensive career counselling for graduates
+          type: string
+        service_name:
+          example: Grad Careers UK
+          type: string
+        contact_name:
+          example: John Smith
+          type: string
+        contact_title:
+          example: Senior Consultant
+          type: string
+        memo:
+          example: Referral sent for follow-up next week
+          type: string
+        status:
+          example: In Progress
+          type: string
+      type: object
+    TimelineResponse_timeline_inner_oneOf_1:
+      description: Secure message item
+      properties:
+        id:
+          example: 202
+          type: integer
+        feature_block:
+          example: secure_messages
+          type: string
+        feature_block_id:
+          example: "1"
+          type: string
+        start_timestamp:
+          example: 2025-03-26T10:00:00Z
+          type: string
+        item_timestamp:
+          example: 1774459050
+          type: integer
+        created_timestamp:
+          example: 1774459050
+          type: integer
+        message_from:
+          example: EmilyQ45879
+          type: string
+        message_to:
+          example: ""
+          type: string
+        message_content:
+          example: Please review the attached referral details before the meeting.
+          type: string
+      type: object
+    TimelineResponse_timeline_inner_oneOf_2:
+      description: Calendar event item
+      properties:
+        id:
+          example: 303
+          type: integer
+        feature_block:
+          example: calendar
+          type: string
+        feature_block_id:
+          example: "80"
+          type: string
+        start_timestamp:
+          example: 2025-08-04T06:30:00Z
+          type: string
+        item_timestamp:
+          example: 1754289000
+          type: integer
+        end_timestamp:
+          example: 2025-08-04T07:30:00Z
+          type: string
+        title:
+          example: Quarterly Business Review
+          type: string
+        location:
+          example: Zoom Meeting Room 1
+          type: string
+        organiser:
+          example: Alice Johnson
+          type: string
+        description:
+          example: Review of Q2 performance metrics and planning for Q3
+          type: string
+        status:
+          example: CONFIRMED
+          type: string
+        duration_string:
+          example: 1 hour
+          type: string
+        duration_of_event:
+          example: 1
+          type: number
+      type: object
+    TimelineResponse_timeline_inner:
+      oneOf:
+      - $ref: "#/components/schemas/TimelineResponse_timeline_inner_oneOf"
+      - $ref: "#/components/schemas/TimelineResponse_timeline_inner_oneOf_1"
+      - $ref: "#/components/schemas/TimelineResponse_timeline_inner_oneOf_2"
+    TimelineSingleItemResponse_timeline_item:
+      description: "The timeline item, which can be one of multiple types, returned\
+        \ as an object"
+      oneOf:
+      - $ref: "#/components/schemas/TimelineItemReferral"
+      - $ref: "#/components/schemas/TimelineItemSecureMessage"
+      - $ref: "#/components/schemas/TimelineItemCalendarEvent"
+  securitySchemes:
+    oauth2:
+      flows:
+        clientCredentials:
+          scopes:
+            mydex:pdx: Global access scope
+            post:/calendar/add-event: Create a calendar event
+            post:/calendar/add-appointment: Create a calendar appointment
+            put:/calendar/update-event: Update a calendar event
+            delete:/calendar/delete-event: Delete a calendar event
+            get:/calendar/get-events: Read calendar events
+            get:/calendar/get-appointments: Read calendar appointments
+            post:/referrals/self-refer: Make a self-referral to a service
+            get:/referrals/read-all: Read all referrals
+            get:/referrals/read-single: Read a single referral
+            put:/referrals/update-status: Update the status of a referral
+            post:/secure-messages/send: Send a message FROM the member's PDS
+            post:/secure-messages/receive: Send a message TO the member's PDS
+            get:/secure-messages/conversation: Read messages grouped by the specified
+              conversation
+            get:/timeline: Read a list of timeline items
+            get:/timeline/single-item: Read a single item from the timeline
+          tokenUrl: https://op.mydexid.org/oauth2/token
+      type: oauth2
